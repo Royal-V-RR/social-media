@@ -969,6 +969,7 @@
     }
     var reminder = reminders[Math.floor(Math.random() * reminders.length)];
 
+    var pinnedHtml = (searchTerm && searchTerm.trim()) ? "" : renderPinnedPost();
     var feedHtml = "";
     if(filtered.length === 0){
       if(posts.length === 0){
@@ -998,7 +999,7 @@
     + '        <button class="btn small" id="submitPostBtn">Post</button>'
     + '      </div>'
     + '    </div>'
-    +      feedHtml
+    +      pinnedHtml + feedHtml
     + '  </div>'
     + '  <div>'
     + '    <div class="card side-card" style="margin-bottom:16px;">'
@@ -1202,6 +1203,7 @@
         });
       }
 
+      bindCipher();
       bindPostCards(account);
     }
 
@@ -1383,6 +1385,106 @@
     } else {
       renderView(account);
     }
+  }
+
+
+  /* ---------- Pinned post with embedded encoder / decoder ---------- */
+
+  var CIPHER_ALPHA = "abcdefghijklmnopqrstuvwxyz";
+  var cipher = { key:"", arr:null, mode:"encode", input:"", output:"", status:"" };
+
+  function cipherGenKey(key){
+    var seen = {}, out = [], i, c;
+    for(i=0;i<key.length;i++){
+      c = key.charAt(i);
+      if(CIPHER_ALPHA.indexOf(c) >= 0 && !seen[c]){ seen[c] = true; out.push(c); }
+    }
+    for(i=0;i<CIPHER_ALPHA.length;i++){
+      c = CIPHER_ALPHA.charAt(i);
+      if(!seen[c]){ seen[c] = true; out.push(c); }
+    }
+    return out;
+  }
+  function cipherEncode(text, arr){
+    var out = "", i, ch, idx;
+    for(i=0;i<text.length;i++){
+      ch = text.charAt(i);
+      if(ch === " "){ out += " "; continue; }
+      idx = CIPHER_ALPHA.indexOf(ch);
+      out += arr[idx];
+    }
+    return out;
+  }
+  function cipherDecode(text, arr){
+    var out = "", i, ch, idx;
+    for(i=0;i<text.length;i++){
+      ch = text.charAt(i);
+      if(ch === " "){ out += " "; continue; }
+      idx = arr.indexOf(ch);
+      out += CIPHER_ALPHA[idx];
+    }
+    return out;
+  }
+
+  function renderPinnedPost(){
+    var inputStyle = 'width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;';
+    return ''
+    + '<div class="card post" id="pinnedPost">'
+    + '  <div class="post-head">'
+    + '    <div class="avatar" style="width:42px;height:42px;font-size:16px;">P</div>'
+    + '    <div><div class="post-name">Profile</div></div>'
+    + '  </div>'
+    + '  <div class="post-body">hi</div>'
+    + '  <div style="border:1px solid var(--border);border-radius:10px;padding:14px;background:#fafbfc;">'
+    + '    <div style="display:flex;gap:8px;margin-bottom:6px;">'
+    + '      <input type="text" id="cipKey" placeholder="Enter your key" style="'+inputStyle+'flex:1;" value="'+esc(cipher.key)+'">'
+    + '      <button class="btn small" id="cipSetKey">Set key</button>'
+    + '    </div>'
+    + '    <div class="reminder-text" id="cipStatus" style="min-height:18px;margin-bottom:10px;">'+esc(cipher.status)+'</div>'
+    + '    <div style="display:flex;gap:8px;margin-bottom:10px;">'
+    + '      <button class="btn small '+(cipher.mode==="encode"?'':'secondary')+'" id="cipModeEncode">Encode</button>'
+    + '      <button class="btn small '+(cipher.mode==="decode"?'':'secondary')+'" id="cipModeDecode">Decode</button>'
+    + '    </div>'
+    + '    <textarea id="cipInput" placeholder="'+(cipher.mode==="encode"?"Please enter your message:":"Please enter your code:")+'" style="'+inputStyle+'min-height:60px;resize:vertical;">'+esc(cipher.input)+'</textarea>'
+    + '    <div style="margin:10px 0;"><button class="btn small" id="cipRun">Run</button></div>'
+    + '    <div class="post-body" id="cipOutput" style="margin:0;word-break:break-word;">'+esc(cipher.output)+'</div>'
+    + '  </div>'
+    + '</div>';
+  }
+
+  function bindCipher(){
+    var keyEl = qs("#cipKey");
+    if(!keyEl) return;
+    var inEl = qs("#cipInput");
+    keyEl.addEventListener("input", function(){ cipher.key = keyEl.value; });
+    inEl.addEventListener("input", function(){ cipher.input = inEl.value; });
+    qs("#cipSetKey").addEventListener("click", function(){
+      cipher.key = keyEl.value;
+      cipher.arr = cipherGenKey(cipher.key);
+      cipher.status = "Key accepted.";
+      qs("#cipStatus").textContent = cipher.status;
+    });
+    function setMode(m){
+      cipher.mode = m;
+      qs("#cipModeEncode").className = "btn small" + (m==="encode" ? "" : " secondary");
+      qs("#cipModeDecode").className = "btn small" + (m==="decode" ? "" : " secondary");
+      inEl.placeholder = m==="encode" ? "Please enter your message:" : "Please enter your code:";
+    }
+    qs("#cipModeEncode").addEventListener("click", function(){ setMode("encode"); });
+    qs("#cipModeDecode").addEventListener("click", function(){ setMode("decode"); });
+    qs("#cipRun").addEventListener("click", function(){
+      var out;
+      if(!cipher.arr){
+        cipher.status = "Set a key first.";
+        qs("#cipStatus").textContent = cipher.status;
+        return;
+      }
+      cipher.input = inEl.value;
+      if(cipher.mode === "encode") out = "Encoded message: " + cipherEncode(cipher.input, cipher.arr);
+      else out = "Decoded message: " + cipherDecode(cipher.input, cipher.arr);
+      cipher.output = out;
+      qs("#cipOutput").textContent = out;
+    });
   }
 
   /* ---------- Init ---------- */
