@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chatter</title>
+<style>
+  :root{
+    --bg:#f0f2f5;
+    --card:#ffffff;
+    --border:#e3e6ea;
+    --text:#1c1e21;
+    --muted:#65676b;
+    --blue:#2f6fed;
+    --blue-dark:#2557c7;
+    --blue-soft:#eaf0fe;
+    --danger:#e0245e;
+    --radius:12px;
+    --shadow:0 1px 2px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  button{font-family:inherit;cursor:pointer;}
+  input,textarea{font-family:inherit;}
+  a{color:var(--blue);text-decoration:none;}
+
+  .hidden{display:none !important;}
+
+  /* Landing */
+  .landing{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  .landing-nav{
+    display:flex;
+    align-items:center;
+    padding:20px 32px;
+  }
+  .logo{
+    font-size:26px;
+    font-weight:800;
+    color:var(--blue);
+    letter-spacing:0.2px;
+  }
+  .landing-hero{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .landing-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:48px 40px;
+    max-width:420px;
+    width:100%;
+    text-align:center;
+  }
+  .landing-card h1{
+    font-size:26px;
+    margin:0 0 12px 0;
+  }
+  .landing-card p{
+    color:var(--muted);
+    font-size:16px;
+    margin:0 0 28px 0;
+    line-height:1.5;
+  }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--blue);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:12px 22px;
+    font-size:15px;
+    font-weight:600;
+    transition:background 0.15s ease, transform 0.1s ease;
+  }
+  .btn:hover{background:var(--blue-dark);}
+  .btn:active{transform:scale(0.98);}
+  .btn.full{width:100%;}
+  .btn.secondary{
+    background:var(--blue-soft);
+    color:var(--blue-dark);
+  }
+  .btn.secondary:hover{background:#dde8fd;}
+  .btn.ghost{
+    background:transparent;
+    color:var(--muted);
+    border:1px solid var(--border);
+  }
+  .btn.ghost:hover{background:#f5f6f8;}
+  .btn.danger{
+    background:#fdecef;
+    color:var(--danger);
+  }
+  .btn.danger:hover{background:#fbd9e0;}
+  .btn.small{padding:7px 14px;font-size:13px;}
+
+  /* Auth form */
+  .auth-wrap{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .auth-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:36px;
+    max-width:440px;
+    width:100%;
+  }
+  .auth-card h2{margin:0 0 4px 0;font-size:22px;}
+  .auth-card .sub{color:var(--muted);font-size:14px;margin:0 0 24px 0;}
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  .field input[type=text],
+  .field input[type=password],
+  .field input[type=date]{
+    width:100%;
+    padding:11px 12px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    font-size:14px;
+    background:#fafbfc;
+  }
+  .field input:focus{
+    outline:none;
+    border-color:var(--blue);
+    background:#fff;
+  }
+  .avatar-picker{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .avatar-picker .avatar{width:56px;height:56px;font-size:20px;}
+  .avatar-picker input{font-size:13px;}
+
+  /* Avatar */
+  .avatar{
+    border-radius:50%;
+    background:linear-gradient(135deg,#5b8def,#2f6fed);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    flex-shrink:0;
+    object-fit:cover;
+    overflow:hidden;
+  }
+  .avatar img{width:100%;height:100%;object-fit:cover;}
+
+  /* App shell */
+  .app-shell{min-height:100vh;}
+  .topnav{
+    position:sticky;
+    top:0;
+    z-index:20;
+    background:var(--card);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 24px;
+  }
+  .topnav-left{display:flex;align-items:center;gap:18px;}
+  .topnav-search{
+    display:flex;
+    align-items:center;
+    background:var(--bg);
+    border-radius:20px;
+    padding:8px 14px;
+    gap:8px;
+    min-width:220px;
+  }
+  .topnav-search input{
+    border:none;
+    background:transparent;
+    outline:none;
+    font-size:14px;
+    width:100%;
+  }
+  .topnav-mid{display:flex;gap:6px;}
+  .navbtn{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+    background:transparent;
+    border:none;
+    color:var(--muted);
+    padding:8px 20px;
+    border-radius:8px;
+    font-size:11px;
+    font-weight:600;
+    position:relative;
+  }
+  .navbtn:hover{background:var(--bg);}
+  .navbtn.active{color:var(--blue);}
+  .navbtn .icon{font-size:19px;}
+  .badge{
+    position:absolute;
+    top:2px;
+    right:10px;
+    background:var(--danger);
+    color:#fff;
+    font-size:10px;
+    font-weight:700;
+    border-radius:9px;
+    min-width:16px;
+    height:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 4px;
+  }
+  .topnav-right{display:flex;align-items:center;gap:12px;}
+
+  .layout{
+    max-width:900px;
+    margin:0 auto;
+    padding:24px 16px 80px 16px;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:20px;
+  }
+  .layout.with-side{grid-template-columns:2fr 1fr;align-items:start;}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:18px;
+  }
+
+  /* Composer */
+  .composer-head{display:flex;gap:12px;align-items:flex-start;}
+  .composer-head textarea{
+    flex:1;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px;
+    font-size:15px;
+    resize:vertical;
+    min-height:56px;
+    background:#fafbfc;
+  }
+  .composer-head textarea:focus{outline:none;border-color:var(--blue);background:#fff;}
+  .composer-footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px solid var(--border);
+  }
+  .composer-tools{display:flex;gap:8px;align-items:center;}
+  .composer-tools label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color:var(--muted);
+    font-size:13px;
+    font-weight:600;
+    padding:6px 10px;
+    border-radius:8px;
+  }
+  .composer-tools label:hover{background:var(--bg);}
+  .composer-preview{
+    margin-top:10px;
+    position:relative;
+    display:inline-block;
+  }
+  .composer-preview img{
+    max-height:180px;
+    border-radius:10px;
+    display:block;
+  }
+  .composer-preview button{
+    position:absolute;
+    top:6px;
+    right:6px;
+    background:rgba(0,0,0,0.55);
+    color:#fff;
+    border:none;
+    border-radius:50%;
+    width:22px;
+    height:22px;
+    font-size:13px;
+    line-height:1;
+  }
+
+  /* Post */
+  .post{margin-bottom:16px;}
+  .post-head{display:flex;align-items:center;gap:10px;}
+  .post-head .avatar{width:42px;height:42px;font-size:16px;}
+  .post-name{font-weight:700;font-size:14.5px;}
+  .post-time{color:var(--muted);font-size:12.5px;}
+  .post-body{margin:12px 0;font-size:15px;line-height:1.5;white-space:pre-wrap;}
+  .post-image{margin:10px 0;}
+  .post-image img{width:100%;border-radius:10px;display:block;}
+  .post-stats{
+    display:flex;
+    justify-content:space-between;
+    color:var(--muted);
+    font-size:12.5px;
+    padding:6px 2px;
+  }
+  .post-actions{
+    display:flex;
+    border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+    margin:6px 0 10px 0;
+  }
+  .post-actions button{
+    flex:1;
+    background:transparent;
+    border:none;
+    color:var(--muted);
+    font-weight:600;
+    font-size:13.5px;
+    padding:9px 0;
+    border-radius:6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+  }
+  .post-actions button:hover{background:var(--bg);}
+  .post-actions button.liked{color:var(--blue);}
+
+  .comment-list{display:flex;flex-direction:column;gap:10px;}
+  .comment{display:flex;gap:8px;align-items:flex-start;}
+  .comment .avatar{width:30px;height:30px;font-size:12px;}
+  .comment-bubble{
+    background:var(--bg);
+    border-radius:14px;
+    padding:8px 12px;
+    font-size:13.5px;
+    flex:1;
+  }
+  .comment-bubble.deleted{
+    background:var(--bg);
+  }
+  .comment-author{font-weight:700;font-size:12.5px;display:block;margin-bottom:1px;cursor:default;}
+  .comment-author.deleted-author{cursor:pointer;}
+  .comment-time{color:var(--muted);font-size:11px;margin-top:2px;}
+  .comment-form{display:flex;gap:8px;margin-top:10px;align-items:center;}
+  .comment-form .avatar{width:28px;height:28px;font-size:11px;}
+  .comment-form input{
+    flex:1;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:8px 14px;
+    font-size:13.5px;
+    background:#fafbfc;
+  }
+  .comment-form input:focus{outline:none;border-color:var(--blue);background:#fff;}
+
+  /* Side card */
+  .side-card h3{margin:0 0 10px 0;font-size:15px;}
+  .reminder-text{color:var(--muted);font-size:13.5px;line-height:1.5;}
+  .profile-mini{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .profile-mini .avatar{width:50px;height:50px;font-size:18px;}
+  .profile-mini .n{font-weight:700;font-size:15px;}
+  .profile-mini .u{color:var(--muted);font-size:13px;}
+
+  .empty-state{
+    text-align:center;
+    color:var(--muted);
+    padding:40px 20px;
+  }
+  .empty-state .big{font-size:36px;margin-bottom:8px;}
+
+  /* Notifications */
+  .notif-item{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    padding:14px;
+    border-radius:10px;
+    cursor:pointer;
+    border:1px solid transparent;
+  }
+  .notif-item:hover{background:var(--bg);}
+  .notif-item.unread{background:var(--blue-soft);border-color:#d7e4fc;}
+  .notif-item .avatar{width:38px;height:38px;font-size:14px;}
+  .notif-text{font-size:14px;}
+  .notif-time{color:var(--muted);font-size:12px;margin-top:3px;}
+  .notif-dot{
+    width:9px;height:9px;border-radius:50%;background:var(--blue);
+    margin-top:6px;flex-shrink:0;
+  }
+
+  /* Profile page */
+  .profile-header{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:28px;
+    display:flex;
+    align-items:center;
+    gap:20px;
+    margin-bottom:20px;
+  }
+  .profile-header .avatar{width:88px;height:88px;font-size:30px;}
+  .profile-header h2{margin:0 0 2px 0;font-size:22px;}
+  .profile-header .handle{color:var(--muted);font-size:14px;margin-bottom:6px;}
+  .profile-header .joined{color:var(--muted);font-size:13px;}
+
+  /* Settings */
+  .settings-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:16px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .settings-row:last-child{border-bottom:none;}
+  .settings-row .label{font-weight:600;font-size:14.5px;}
+  .settings-row .desc{color:var(--muted);font-size:13px;margin-top:2px;max-width:400px;}
+
+  .toast{
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:#1c1e21;
+    color:#fff;
+    padding:11px 20px;
+    border-radius:10px;
+    font-size:13.5px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.25);
+    opacity:0;
+    transition:opacity 0.25s ease, transform 0.25s ease;
+    z-index:100;
+    pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .modal-overlay{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,0.4);
+    display:flex;align-items:center;justify-content:center;
+    z-index:50;
+    padding:20px;
+  }
+  .modal{
+    background:#fff;
+    border-radius:var(--radius);
+    padding:26px;
+    max-width:380px;
+    width:100%;
+    box-shadow:var(--shadow);
+  }
+  .modal h3{margin:0 0 10px 0;}
+  .modal p{color:var(--muted);font-size:14px;line-height:1.5;margin:0 0 20px 0;}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+
+  @keyframes pop{
+    0%{transform:scale(1);}
+    30%{transform:scale(1.25);}
+    100%{transform:scale(1);}
+  }
+  .pop{animation:pop 0.28s ease;}
+
+  /* Big notification banner */
+  .notif-banner{
+    position:fixed;
+    top:18px;
+    right:18px;
+    z-index:200;
+    background:#ffffff;
+    border:1px solid var(--border);
+    border-left:4px solid var(--blue);
+    border-radius:12px;
+    box-shadow:0 12px 32px rgba(0,0,0,0.18);
+    padding:16px 18px;
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+    width:320px;
+    max-width:calc(100vw - 36px);
+    cursor:pointer;
+    transform:translateY(-16px);
+    opacity:0;
+    transition:transform 0.28s ease, opacity 0.28s ease;
+  }
+  .notif-banner.show{transform:translateY(0);opacity:1;}
+  .notif-banner-icon{
+    width:40px;height:40px;border-radius:50%;
+    background:var(--blue-soft);
+    display:flex;align-items:center;justify-content:center;
+    font-size:19px;flex-shrink:0;
+  }
+  .notif-banner-body{flex:1;}
+  .notif-banner-title{font-weight:700;font-size:15px;margin-bottom:3px;}
+  .notif-banner-sub{color:var(--muted);font-size:13.5px;line-height:1.4;}
+  .notif-banner-close{
+    background:transparent;border:none;color:var(--muted);
+    font-size:13px;padding:2px;line-height:1;flex-shrink:0;
+  }
+  .notif-banner-close:hover{color:var(--text);}
+
+  @media (max-width:760px){
+    .notif-banner{top:10px;right:10px;left:10px;width:auto;}
+  }
+
+  @media (max-width:760px){
+    .layout.with-side{grid-template-columns:1fr;}
+    .topnav-search{display:none;}
+    .topnav{padding:10px 12px;}
+    .navbtn{padding:8px 12px;}
+    .profile-header{flex-direction:column;text-align:center;padding:24px 18px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var KEYS = {
+    account:"chatter_account",
+    posts:"chatter_posts",
+    notifications:"chatter_notifications",
+    triggerTime:"chatter_event_trigger_time",
+    eventScheduled:"chatter_event_scheduled",
+    eventDone:"chatter_event_done"
+  };
+
+  var reminders = [
+    "Add a photo to your post to make it stand out.",
+    "You can update your profile picture anytime in Settings.",
+    "Use the search bar to find something you posted before.",
+    "Your posts and comments are saved automatically as you go.",
+    "Tap the bell icon anytime to check your notifications."
+  ];
+
+  var view = "home"; // home, notifications, profile, settings
+  var searchTerm = "";
+  var toastTimer = null;
+  var pendingAvatarData = null;
+  var pendingPostImage = null;
+
+  function qs(sel, root){ return (root||document).querySelector(sel); }
+  function esc(str){
+    if(str===undefined || str===null) return "";
+    var div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function getAccount(){
+    try{ return JSON.parse(localStorage.getItem(KEYS.account)); }catch(e){ return null; }
+  }
+  function saveAccount(acc){ localStorage.setItem(KEYS.account, JSON.stringify(acc)); }
+  function getPosts(){
+    try{ return JSON.parse(localStorage.getItem(KEYS.posts)) || []; }catch(e){ return []; }
+  }
+  function savePosts(p){ localStorage.setItem(KEYS.posts, JSON.stringify(p)); }
+  function getNotifications(){
+    try{ return JSON.parse(localStorage.getItem(KEYS.notifications)) || []; }catch(e){ return []; }
+  }
+  function saveNotifications(n){ localStorage.setItem(KEYS.notifications, JSON.stringify(n)); }
+
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+  function formatDate(iso){
+    var d = new Date(iso);
+    var datePart = d.toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
+    var timePart = d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+    return datePart + " at " + timePart;
+  }
+
+  function initials(name){
+    if(!name) return "?";
+    var parts = name.trim().split(/\s+/);
+    var res = parts[0] ? parts[0][0] : "";
+    if(parts.length > 1) res += parts[parts.length-1][0];
+    return res.toUpperCase();
+  }
+
+  function avatarHtml(person, size){
+    size = size || 42;
+    if(person && person.avatar){
+      return '<div class="avatar" style="width:'+size+'px;height:'+size+'px;"><img src="'+person.avatar+'" alt=""></div>';
+    }
+    var name = person ? person.name : "";
+    return '<div class="avatar" style="width:'+size+'px;height:'+size+'px;">'+esc(initials(name))+'</div>';
+  }
+
+  function showToast(msg){
+    var el = qs("#toast");
+    if(!el) return;
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.remove("show"); }, 2400);
+  }
+
+  /* ---------- The unexplained event ---------- */
+
+  function scheduleMysteriousEventIfNeeded(){
+    var scheduled = localStorage.getItem(KEYS.eventScheduled) === "1";
+    var done = localStorage.getItem(KEYS.eventDone) === "1";
+    if(done || !scheduled) return;
+    var triggerTime = parseInt(localStorage.getItem(KEYS.triggerTime), 10) || 0;
+    var now = Date.now();
+    var remaining = triggerTime - now;
+    if(remaining <= 0){
+      fireMysteriousEvent();
+    } else {
+      setTimeout(function(){
+        var stillDone = localStorage.getItem(KEYS.eventDone) === "1";
+        if(!stillDone) fireMysteriousEvent();
+      }, remaining);
+    }
+  }
+
+  function fireMysteriousEvent(){
+    var done = localStorage.getItem(KEYS.eventDone) === "1";
+    if(done) return;
+    var posts = getPosts();
+    if(posts.length === 0) return;
+    var firstPost = posts[posts.length - 1]; // oldest post
+    for(var i=0;i<posts.length;i++){
+      if(!posts[i].isFirst) continue;
+    }
+    var target = null;
+    for(var j=0;j<posts.length;j++){
+      if(posts[j].isFirst){ target = posts[j]; break; }
+    }
+    if(!target) target = firstPost;
+
+    target.comments = target.comments || [];
+    target.comments.push({
+      id: uid(),
+      author: "deleted",
+      authorName: "[Deleted]",
+      content: "Despite everything that has happened, you're still you.",
+      createdAt: new Date().toISOString()
+    });
+    savePosts(posts);
+
+    var newNotif = {
+      id: uid(),
+      type: "comment",
+      postId: target.id,
+      message: "Someone commented on your post.",
+      read: false,
+      createdAt: new Date().toISOString()
+    };
+    var notifs = getNotifications();
+    notifs.unshift(newNotif);
+    saveNotifications(notifs);
+
+    localStorage.setItem(KEYS.eventDone, "1");
+
+    render();
+    showBigNotification(newNotif);
+  }
+
+  function showBigNotification(notif){
+    var existing = qs(".notif-banner");
+    if(existing && existing.parentNode) existing.parentNode.removeChild(existing);
+
+    var el = document.createElement("div");
+    el.className = "notif-banner";
+    el.innerHTML = ''
+      + '<div class="notif-banner-icon">&#128276;</div>'
+      + '<div class="notif-banner-body">'
+      + '  <div class="notif-banner-title">New comment on your post</div>'
+      + '  <div class="notif-banner-sub">'+esc(notif.message)+'</div>'
+      + '</div>'
+      + '<button class="notif-banner-close" aria-label="Dismiss">&#10005;</button>';
+    document.body.appendChild(el);
+    requestAnimationFrame(function(){ el.classList.add("show"); });
+
+    function dismiss(){
+      el.classList.remove("show");
+      setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 300);
+    }
+
+    el.addEventListener("click", function(e){
+      if(e.target.closest(".notif-banner-close")){
+        dismiss();
+        return;
+      }
+      dismiss();
+      var account = getAccount();
+      if(account) openNotification(notif.id, account);
+    });
+
+    setTimeout(dismiss, 9000);
+  }
+
+  function unreadCount(){
+    var n = getNotifications();
+    var c = 0;
+    for(var i=0;i<n.length;i++){ if(!n[i].read) c++; }
+    return c;
+  }
+
+  /* ---------- Rendering ---------- */
+
+  function render(){
+    var app = qs("#app");
+    var account = getAccount();
+    if(!account){
+      app.innerHTML = renderLanding();
+      bindLanding();
+      return;
+    }
+    app.innerHTML = renderAppShell(account);
+    bindAppShell(account);
+  }
+
+  function renderLanding(){
+    return ''
+    + '<div class="landing">'
+    + '  <div class="landing-nav"><span class="logo">Chatter</span></div>'
+    + '  <div class="landing-hero">'
+    + '    <div class="landing-card">'
+    + '      <h1>Welcome to Chatter</h1>'
+    + '      <p>Create an account to start posting.</p>'
+    + '      <button class="btn full" id="createAccountBtn">Create Account</button>'
+    + '    </div>'
+    + '  </div>'
+    + '</div>'
+    + renderSignupModal()
+    + '<div class="toast" id="toast"></div>';
+  }
+
+  function renderSignupModal(){
+    return ''
+    + '<div class="modal-overlay hidden" id="signupOverlay">'
+    + '  <div class="modal" style="max-width:440px;">'
+    + '    <h3>Create your account</h3>'
+    + '    <p>Just a few details to get you set up.</p>'
+    + '    <div class="field"><label>Name</label><input type="text" id="suName" placeholder="Your full name"></div>'
+    + '    <div class="field"><label>Username</label><input type="text" id="suUsername" placeholder="Pick a username"></div>'
+    + '    <div class="field"><label>Password</label><input type="password" id="suPassword" placeholder="Choose a password"></div>'
+    + '    <div class="field"><label>Date of birth</label><input type="date" id="suDob"></div>'
+    + '    <div class="field">'
+    + '      <label>Profile picture</label>'
+    + '      <div class="avatar-picker">'
+    + '        <div class="avatar" id="suAvatarPreview" style="width:56px;height:56px;font-size:20px;">?</div>'
+    + '        <input type="file" id="suAvatarFile" accept="image/*">'
+    + '      </div>'
+    + '    </div>'
+    + '    <div class="modal-actions">'
+    + '      <button class="btn ghost small" id="suCancel">Cancel</button>'
+    + '      <button class="btn small" id="suSubmit">Create Account</button>'
+    + '    </div>'
+    + '  </div>'
+    + '</div>';
+  }
+
+  function bindLanding(){
+    qs("#createAccountBtn").addEventListener("click", function(){
+      qs("#signupOverlay").classList.remove("hidden");
+    });
+    qs("#suCancel").addEventListener("click", function(){
+      qs("#signupOverlay").classList.add("hidden");
+    });
+    qs("#suName").addEventListener("input", updateSignupPreview);
+    qs("#suAvatarFile").addEventListener("change", function(e){
+      var file = e.target.files && e.target.files[0];
+      if(!file) return;
+      var reader = new FileReader();
+      reader.onload = function(ev){
+        pendingAvatarData = ev.target.result;
+        updateSignupPreview();
+      };
+      reader.readAsDataURL(file);
+    });
+    qs("#suSubmit").addEventListener("click", submitSignup);
+  }
+
+  function updateSignupPreview(){
+    var preview = qs("#suAvatarPreview");
+    var name = qs("#suName").value;
+    if(pendingAvatarData){
+      preview.innerHTML = '<img src="'+pendingAvatarData+'" alt="">';
+    } else {
+      preview.textContent = initials(name) || "?";
+    }
+  }
+
+  function submitSignup(){
+    var name = qs("#suName").value.trim();
+    var username = qs("#suUsername").value.trim().replace(/\s+/g,"");
+    var password = qs("#suPassword").value;
+    var dob = qs("#suDob").value;
+
+    if(!name || !username || !password || !dob){
+      showToast("Please fill in every field to continue.");
+      return;
+    }
+
+    var account = {
+      name: name,
+      username: username,
+      password: password,
+      dob: dob,
+      avatar: pendingAvatarData || null,
+      joinedAt: new Date().toISOString()
+    };
+    saveAccount(account);
+    pendingAvatarData = null;
+    render();
+  }
+
+  function renderAppShell(account){
+    var unread = unreadCount();
+    return ''
+    + '<div class="app-shell">'
+    +   renderTopNav(account, unread)
+    +   '<div id="viewRoot"></div>'
+    + '</div>'
+    + '<div class="toast" id="toast"></div>'
+    + renderResetModal();
+  }
+
+  function renderTopNav(account, unread){
+    return ''
+    + '<div class="topnav">'
+    + '  <div class="topnav-left">'
+    + '    <span class="logo">Chatter</span>'
+    + '    <div class="topnav-search">'
+    + '      <span>&#128269;</span>'
+    + '      <input type="text" id="searchInput" placeholder="Search your posts" value="'+esc(searchTerm)+'">'
+    + '    </div>'
+    + '  </div>'
+    + '  <div class="topnav-mid">'
+    + navBtn("home", "&#127968;", "Home", false)
+    + navBtn("notifications", "&#128276;", "Notifications", unread > 0, unread)
+    + navBtn("profile", "&#128100;", "Profile", false)
+    + '  </div>'
+    + '  <div class="topnav-right">'
+    +      avatarHtml(account, 34)
+    + '    <button class="navbtn" id="settingsNavBtn"><span class="icon">&#9881;</span><span>Settings</span></button>'
+    + '  </div>'
+    + '</div>';
+  }
+
+  function navBtn(key, icon, label, showBadge, count){
+    var active = view === key ? " active" : "";
+    var badge = showBadge ? '<span class="badge">'+(count>9?"9+":count)+'</span>' : "";
+    return '<button class="navbtn'+active+'" data-view="'+key+'"><span class="icon">'+icon+'</span><span>'+label+'</span>'+badge+'</button>';
+  }
+
+  function renderResetModal(){
+    return ''
+    + '<div class="modal-overlay hidden" id="resetOverlay">'
+    + '  <div class="modal">'
+    + '    <h3>Reset Chatter</h3>'
+    + '    <p>This removes your account, your posts, and everything stored in this browser. Chatter will return to its original state.</p>'
+    + '    <div class="modal-actions">'
+    + '      <button class="btn ghost small" id="resetCancel">Cancel</button>'
+    + '      <button class="btn danger small" id="resetConfirm">Reset My Data</button>'
+    + '    </div>'
+    + '  </div>'
+    + '</div>';
+  }
+
+  function bindAppShell(account){
+    var buttons = document.querySelectorAll(".navbtn[data-view]");
+    for(var i=0;i<buttons.length;i++){
+      buttons[i].addEventListener("click", function(e){
+        var v = e.currentTarget.getAttribute("data-view");
+        if(v === "notifications"){
+          markAllNotificationsSeenLazy();
+        }
+        view = v;
+        renderView(account);
+        updateActiveNav();
+      });
+    }
+    qs("#settingsNavBtn").addEventListener("click", function(){
+      view = "settings";
+      renderView(account);
+    });
+    var searchInput = qs("#searchInput");
+    if(searchInput){
+      searchInput.addEventListener("input", function(e){
+        searchTerm = e.target.value;
+        if(view !== "home"){ view = "home"; updateActiveNav(); }
+        renderView(account);
+      });
+    }
+    qs("#resetCancel").addEventListener("click", function(){
+      qs("#resetOverlay").classList.add("hidden");
+    });
+    qs("#resetConfirm").addEventListener("click", function(){
+      Object.keys(KEYS).forEach(function(k){ localStorage.removeItem(KEYS[k]); });
+      view = "home";
+      render();
+    });
+
+    renderView(account);
+  }
+
+  function updateActiveNav(){
+    var buttons = document.querySelectorAll(".navbtn[data-view]");
+    for(var i=0;i<buttons.length;i++){
+      var v = buttons[i].getAttribute("data-view");
+      if(v === view) buttons[i].classList.add("active");
+      else buttons[i].classList.remove("active");
+    }
+  }
+
+  function markAllNotificationsSeenLazy(){
+    // notifications are marked read individually on click, not in bulk
+  }
+
+  function renderView(account){
+    var root = qs("#viewRoot");
+    if(view === "home") root.innerHTML = renderHome(account);
+    else if(view === "notifications") root.innerHTML = renderNotifications(account);
+    else if(view === "profile") root.innerHTML = renderProfile(account);
+    else if(view === "settings") root.innerHTML = renderSettings(account);
+    bindViewEvents(account);
+  }
+
+  /* ---------- Home / feed ---------- */
+
+  function renderHome(account){
+    var posts = getPosts();
+    var filtered = posts;
+    if(searchTerm && searchTerm.trim()){
+      var t = searchTerm.trim().toLowerCase();
+      filtered = posts.filter(function(p){ return p.content.toLowerCase().indexOf(t) !== -1; });
+    }
+    var reminder = reminders[Math.floor(Math.random() * reminders.length)];
+
+    var feedHtml = "";
+    if(filtered.length === 0){
+      if(posts.length === 0){
+        feedHtml = '<div class="card empty-state"><div class="big">&#128172;</div><p>You have not posted anything yet.</p><p>Say something above to get your feed started.</p></div>';
+      } else {
+        feedHtml = '<div class="card empty-state"><p>No posts match your search.</p></div>';
+      }
+    } else {
+      for(var i=0;i<filtered.length;i++){
+        feedHtml += renderPost(filtered[i], account);
+      }
+    }
+
+    return ''
+    + '<div class="layout with-side">'
+    + '  <div>'
+    + '    <div class="card" style="margin-bottom:20px;">'
+    + '      <div class="composer-head">'
+    +          avatarHtml(account, 44)
+    + '        <textarea id="postContent" placeholder="What\'s on your mind?"></textarea>'
+    + '      </div>'
+    + '      <div class="composer-preview hidden" id="composerPreview"><img id="composerPreviewImg" src=""><button id="composerPreviewRemove">&#10005;</button></div>'
+    + '      <div class="composer-footer">'
+    + '        <div class="composer-tools">'
+    + '          <label>&#128247; <span>Photo</span><input type="file" accept="image/*" id="postImageInput" style="display:none;"></label>'
+    + '        </div>'
+    + '        <button class="btn small" id="submitPostBtn">Post</button>'
+    + '      </div>'
+    + '    </div>'
+    +      feedHtml
+    + '  </div>'
+    + '  <div>'
+    + '    <div class="card side-card" style="margin-bottom:16px;">'
+    +      '<div class="profile-mini">'
+    +        avatarHtml(account, 50)
+    + '      <div><div class="n">'+esc(account.name)+'</div><div class="u">&#64;'+esc(account.username)+'</div></div>'
+    + '    </div>'
+    + '    <button class="btn secondary full small" data-view-link="profile">View Profile</button>'
+    + '    </div>'
+    + '    <div class="card side-card">'
+    + '      <h3>Tips</h3>'
+    + '      <p class="reminder-text">'+esc(reminder)+'</p>'
+    + '    </div>'
+    + '  </div>'
+    + '</div>';
+  }
+
+  function renderPost(post, account){
+    var liked = !!post.likedByUser;
+    var comments = post.comments || [];
+    var commentsHtml = "";
+    for(var i=0;i<comments.length;i++){
+      commentsHtml += renderComment(comments[i], account);
+    }
+    return ''
+    + '<div class="card post" data-post-id="'+post.id+'">'
+    + '  <div class="post-head">'
+    +      avatarHtml(account, 42)
+    + '    <div><div class="post-name">'+esc(account.name)+'</div><div class="post-time">'+esc(formatDate(post.createdAt))+'</div></div>'
+    + '  </div>'
+    + '  <div class="post-body">'+esc(post.content)+'</div>'
+    +    (post.image ? '<div class="post-image"><img src="'+post.image+'" alt=""></div>' : '')
+    + '  <div class="post-stats"><span>'+(post.likedByUser ? "1 like" : "No likes yet")+'</span><span>'+comments.length+' comments, '+(post.shares||0)+' shares</span></div>'
+    + '  <div class="post-actions">'
+    + '    <button class="likeBtn'+(liked?' liked':'')+'" data-action="like">&#128077; Like</button>'
+    + '    <button data-action="focusComment">&#128172; Comment</button>'
+    + '    <button data-action="share">&#8635; Share</button>'
+    + '  </div>'
+    + '  <div class="comment-list">'+commentsHtml+'</div>'
+    + '  <div class="comment-form">'
+    +      avatarHtml(account, 28)
+    + '    <input type="text" placeholder="Write a comment" data-comment-input>'
+    + '  </div>'
+    + '</div>';
+  }
+
+  function renderComment(comment, account){
+    if(comment.author === "deleted"){
+      return ''
+      + '<div class="comment">'
+      + '  <div class="avatar" style="width:30px;height:30px;font-size:12px;background:#c8ccd2;">?</div>'
+      + '  <div class="comment-bubble deleted">'
+      + '    <span class="comment-author deleted-author" data-deleted-author>[Deleted]</span>'
+      +      esc(comment.content)
+      + '    <div class="comment-time">'+esc(formatDate(comment.createdAt))+'</div>'
+      + '  </div>'
+      + '</div>';
+    }
+    return ''
+    + '<div class="comment">'
+    +    avatarHtml(account, 30)
+    + '  <div class="comment-bubble">'
+    + '    <span class="comment-author">'+esc(account.name)+'</span>'
+    +      esc(comment.content)
+    + '    <div class="comment-time">'+esc(formatDate(comment.createdAt))+'</div>'
+    + '  </div>'
+    + '</div>';
+  }
+
+  /* ---------- Notifications ---------- */
+
+  function renderNotifications(account){
+    var notifs = getNotifications();
+    if(notifs.length === 0){
+      return '<div class="layout"><div class="card empty-state"><div class="big">&#128276;</div><p>You have no notifications right now.</p></div></div>';
+    }
+    var html = '<div class="layout"><div class="card">';
+    for(var i=0;i<notifs.length;i++){
+      var n = notifs[i];
+      html += ''
+      + '<div class="notif-item'+(n.read ? '' : ' unread')+'" data-notif-id="'+n.id+'">'
+      +   avatarHtml(account, 38)
+      + '  <div style="flex:1;">'
+      + '    <div class="notif-text">'+esc(n.message)+'</div>'
+      + '    <div class="notif-time">'+esc(formatDate(n.createdAt))+'</div>'
+      + '  </div>'
+      +   (n.read ? '' : '<div class="notif-dot"></div>')
+      + '</div>';
+    }
+    html += '</div></div>';
+    return html;
+  }
+
+  /* ---------- Profile ---------- */
+
+  function renderProfile(account){
+    var posts = getPosts();
+    var joined = formatDate(account.joinedAt);
+    var feedHtml = "";
+    if(posts.length === 0){
+      feedHtml = '<div class="card empty-state"><p>Nothing posted yet.</p></div>';
+    } else {
+      for(var i=0;i<posts.length;i++){
+        feedHtml += renderPost(posts[i], account);
+      }
+    }
+    return ''
+    + '<div class="layout">'
+    + '  <div class="profile-header">'
+    +      avatarHtml(account, 88)
+    + '    <div>'
+    + '      <h2>'+esc(account.name)+'</h2>'
+    + '      <div class="handle">&#64;'+esc(account.username)+'</div>'
+    + '      <div class="joined">Joined '+esc(joined)+'</div>'
+    + '    </div>'
+    + '  </div>'
+    +    feedHtml
+    + '</div>';
+  }
+
+  /* ---------- Settings ---------- */
+
+  function renderSettings(account){
+    return ''
+    + '<div class="layout">'
+    + '  <div class="card">'
+    + '    <h3 style="margin-top:0;">Account</h3>'
+    + '    <div class="settings-row">'
+    + '      <div><div class="label">Name</div><div class="desc">'+esc(account.name)+'</div></div>'
+    + '    </div>'
+    + '    <div class="settings-row">'
+    + '      <div><div class="label">Username</div><div class="desc">&#64;'+esc(account.username)+'</div></div>'
+    + '    </div>'
+    + '    <div class="settings-row">'
+    + '      <div><div class="label">Date of birth</div><div class="desc">'+esc(account.dob)+'</div></div>'
+    + '    </div>'
+    + '  </div>'
+    + '  <div class="card">'
+    + '    <h3 style="margin-top:0;">Data</h3>'
+    + '    <div class="settings-row">'
+    + '      <div>'
+    + '        <div class="label">Reset Chatter</div>'
+    + '        <div class="desc">Remove your account and everything stored in this browser, then start over.</div>'
+    + '      </div>'
+    + '      <button class="btn danger small" id="openResetBtn">Reset</button>'
+    + '    </div>'
+    + '  </div>'
+    + '</div>';
+  }
+
+  /* ---------- View level events ---------- */
+
+  function bindViewEvents(account){
+    if(view === "home"){
+      var submitBtn = qs("#submitPostBtn");
+      if(submitBtn){
+        submitBtn.addEventListener("click", function(){
+          var textarea = qs("#postContent");
+          var content = textarea.value.trim();
+          if(!content && !pendingPostImage){
+            showToast("Write something or add a photo first.");
+            return;
+          }
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Posting...";
+          setTimeout(function(){
+            submitPost(account);
+          }, 500 + Math.random() * 500);
+        });
+      }
+
+      var imageInput = qs("#postImageInput");
+      if(imageInput){
+        imageInput.addEventListener("change", function(e){
+          var file = e.target.files && e.target.files[0];
+          if(!file) return;
+          var reader = new FileReader();
+          reader.onload = function(ev){
+            pendingPostImage = ev.target.result;
+            var preview = qs("#composerPreview");
+            qs("#composerPreviewImg").src = pendingPostImage;
+            preview.classList.remove("hidden");
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+      var removeBtn = qs("#composerPreviewRemove");
+      if(removeBtn){
+        removeBtn.addEventListener("click", function(){
+          pendingPostImage = null;
+          qs("#composerPreview").classList.add("hidden");
+        });
+      }
+
+      var viewLinks = document.querySelectorAll("[data-view-link]");
+      for(var i=0;i<viewLinks.length;i++){
+        viewLinks[i].addEventListener("click", function(e){
+          view = e.currentTarget.getAttribute("data-view-link");
+          renderView(account);
+          updateActiveNav();
+        });
+      }
+
+      bindPostCards(account);
+    }
+
+    if(view === "profile"){
+      bindPostCards(account);
+    }
+
+    if(view === "notifications"){
+      var items = document.querySelectorAll(".notif-item");
+      for(var j=0;j<items.length;j++){
+        items[j].addEventListener("click", function(e){
+          var id = e.currentTarget.getAttribute("data-notif-id");
+          openNotification(id, account);
+        });
+      }
+    }
+
+    if(view === "settings"){
+      var openReset = qs("#openResetBtn");
+      if(openReset){
+        openReset.addEventListener("click", function(){
+          qs("#resetOverlay").classList.remove("hidden");
+        });
+      }
+    }
+  }
+
+  function bindPostCards(account){
+    var cards = document.querySelectorAll(".post[data-post-id]");
+    for(var i=0;i<cards.length;i++){
+      (function(card){
+        var postId = card.getAttribute("data-post-id");
+
+        var likeBtn = card.querySelector('[data-action="like"]');
+        if(likeBtn){
+          likeBtn.addEventListener("click", function(){
+            toggleLike(postId, account);
+          });
+        }
+        var shareBtn = card.querySelector('[data-action="share"]');
+        if(shareBtn){
+          shareBtn.addEventListener("click", function(){
+            sharePost(postId, account);
+          });
+        }
+        var focusBtn = card.querySelector('[data-action="focusComment"]');
+        if(focusBtn){
+          focusBtn.addEventListener("click", function(){
+            var input = card.querySelector("[data-comment-input]");
+            if(input) input.focus();
+          });
+        }
+        var commentInput = card.querySelector("[data-comment-input]");
+        if(commentInput){
+          commentInput.addEventListener("keydown", function(e){
+            if(e.key === "Enter" && commentInput.value.trim()){
+              addComment(postId, commentInput.value.trim(), account);
+              commentInput.value = "";
+            }
+          });
+        }
+        var deletedAuthor = card.querySelector("[data-deleted-author]");
+        if(deletedAuthor){
+          deletedAuthor.addEventListener("click", function(){
+            showToast("This profile is unavailable.");
+          });
+        }
+      })(cards[i]);
+    }
+  }
+
+  function submitPost(account){
+    var textarea = qs("#postContent");
+    var content = textarea.value.trim();
+    if(!content && !pendingPostImage){
+      showToast("Write something or add a photo first.");
+      return;
+    }
+    var posts = getPosts();
+    var isFirst = posts.length === 0;
+    var post = {
+      id: uid(),
+      content: content,
+      image: pendingPostImage,
+      createdAt: new Date().toISOString(),
+      likedByUser: false,
+      comments: [],
+      shares: 0,
+      isFirst: isFirst
+    };
+    posts.unshift(post);
+    savePosts(posts);
+
+    pendingPostImage = null;
+
+    if(isFirst){
+      var alreadyScheduled = localStorage.getItem(KEYS.eventScheduled) === "1";
+      var alreadyDone = localStorage.getItem(KEYS.eventDone) === "1";
+      if(!alreadyScheduled && !alreadyDone){
+        var delay = 5000 + Math.floor(Math.random() * 5000);
+        localStorage.setItem(KEYS.triggerTime, String(Date.now() + delay));
+        localStorage.setItem(KEYS.eventScheduled, "1");
+        setTimeout(function(){
+          var done = localStorage.getItem(KEYS.eventDone) === "1";
+          if(!done) fireMysteriousEvent();
+        }, delay);
+      }
+    }
+
+    renderView(account);
+  }
+
+  function toggleLike(postId, account){
+    var posts = getPosts();
+    for(var i=0;i<posts.length;i++){
+      if(posts[i].id === postId){
+        posts[i].likedByUser = !posts[i].likedByUser;
+        break;
+      }
+    }
+    savePosts(posts);
+    renderView(account);
+  }
+
+  function sharePost(postId, account){
+    var posts = getPosts();
+    for(var i=0;i<posts.length;i++){
+      if(posts[i].id === postId){
+        posts[i].shares = (posts[i].shares || 0) + 1;
+        break;
+      }
+    }
+    savePosts(posts);
+    showToast("Post shared to your profile.");
+    renderView(account);
+  }
+
+  function addComment(postId, content, account){
+    var posts = getPosts();
+    for(var i=0;i<posts.length;i++){
+      if(posts[i].id === postId){
+        posts[i].comments = posts[i].comments || [];
+        posts[i].comments.push({
+          id: uid(),
+          author: "self",
+          content: content,
+          createdAt: new Date().toISOString()
+        });
+        break;
+      }
+    }
+    savePosts(posts);
+    renderView(account);
+  }
+
+  function openNotification(id, account){
+    var notifs = getNotifications();
+    var target = null;
+    for(var i=0;i<notifs.length;i++){
+      if(notifs[i].id === id){
+        notifs[i].read = true;
+        target = notifs[i];
+      }
+    }
+    saveNotifications(notifs);
+
+    if(target && target.postId){
+      view = "home";
+      searchTerm = "";
+      renderView(account);
+      updateActiveNav();
+      setTimeout(function(){
+        var card = document.querySelector('.post[data-post-id="'+target.postId+'"]');
+        if(card){
+          card.scrollIntoView({behavior:"smooth", block:"center"});
+          card.classList.add("pop");
+        }
+      }, 50);
+    } else {
+      renderView(account);
+    }
+  }
+
+  /* ---------- Init ---------- */
+
+  document.addEventListener("DOMContentLoaded", function(){
+    render();
+    scheduleMysteriousEventIfNeeded();
+  });
+})();
+</script>
+</body>
+</html>
