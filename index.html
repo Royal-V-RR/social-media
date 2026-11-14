@@ -1405,26 +1405,20 @@
     }
     return out;
   }
-  function cipherEncode(text, arr){
-    var out = "", i, ch, idx;
+  function cipherMap(text, from, to){
+    var out = "", i, ch, low, idx, m;
     for(i=0;i<text.length;i++){
       ch = text.charAt(i);
-      if(ch === " "){ out += " "; continue; }
-      idx = CIPHER_ALPHA.indexOf(ch);
-      out += arr[idx];
+      low = ch.toLowerCase();
+      idx = from.indexOf(low);
+      if(idx < 0){ out += ch; continue; }
+      m = to[idx];
+      out += (ch !== low) ? m.toUpperCase() : m;
     }
     return out;
   }
-  function cipherDecode(text, arr){
-    var out = "", i, ch, idx;
-    for(i=0;i<text.length;i++){
-      ch = text.charAt(i);
-      if(ch === " "){ out += " "; continue; }
-      idx = arr.indexOf(ch);
-      out += CIPHER_ALPHA[idx];
-    }
-    return out;
-  }
+  function cipherEncode(text, arr){ return cipherMap(text, CIPHER_ALPHA.split(""), arr); }
+  function cipherDecode(text, arr){ return cipherMap(text, arr, CIPHER_ALPHA.split("")); }
 
   function renderPinnedPost(){
     var inputStyle = 'width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;';
@@ -1434,7 +1428,7 @@
     + '    <div class="avatar" style="width:42px;height:42px;font-size:16px;">P</div>'
     + '    <div><div class="post-name">Profile</div></div>'
     + '  </div>'
-    + '  <div class="post-body">hi</div>'
+    + '  <div class="post-body">hi v2</div>'
     + '  <div style="border:1px solid var(--border);border-radius:10px;padding:14px;background:#fafbfc;">'
     + '    <div style="display:flex;gap:8px;margin-bottom:6px;">'
     + '      <input type="text" id="cipKey" placeholder="Enter your key" style="'+inputStyle+'flex:1;" value="'+esc(cipher.key)+'">'
@@ -1474,6 +1468,11 @@
     qs("#cipModeDecode").addEventListener("click", function(){ setMode("decode"); });
     qs("#cipRun").addEventListener("click", function(){
       var out;
+      if(keyEl.value !== cipher.key || !cipher.arr){
+        cipher.key = keyEl.value;
+        cipher.arr = cipher.key ? cipherGenKey(cipher.key) : null;
+        if(cipher.arr) cipher.status = "Key accepted.";
+      }
       if(!cipher.arr){
         cipher.status = "Set a key first.";
         qs("#cipStatus").textContent = cipher.status;
